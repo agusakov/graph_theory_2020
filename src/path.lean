@@ -265,6 +265,9 @@ def is_cycle : Prop := p.head = p.last
 /-- p.is_trail if p has no repeated edges. -/
 def is_trail : Prop := list.nodup p.edges
 
+/-- p.is_tour if p has no repeated vertices. -/
+def is_tour : Prop := list.nodup p.vertices
+
 /-- p.is_Eulerian if p hits each edge exactly once. -/
 def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
 
