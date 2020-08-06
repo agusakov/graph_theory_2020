@@ -50,6 +50,7 @@ a `has_mem` instance.
 (adj : V → V → Prop)
 (sym : symmetric adj . obviously)
 (loopless : irreflexive adj . obviously)
+--(unique_edges : edge set not multiset?)
 namespace simple_graph
 
 

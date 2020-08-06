@@ -5,6 +5,8 @@ import path
 universe u
 variables (V : Type u)
 
+-- TO DO:
+    -- define components (they are used twice here), give them some lemmas
 
 namespace simple_graph
 
@@ -26,37 +28,92 @@ def leaf (v : V) [fintype (T.neighbor_set v)] : Prop := T.degree v = 1
 
 variables [∀ v, fintype (T.neighbor_set v)]
 
--- every tree on n ≥ 2 vertices contains at least two vertices of degree 1
-
+/- Theorem 1: every tree on n ≥ 2 vertices contains at least two vertices of degree 1 -/
 lemma two_deg_one (t : tree T) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
 begin
-    -- let p = x0 x1 ... xk in T. maximal path in T? how do i define maximal 
+    -- Proof outline:
+    -- let p = x0 x1 ... xk in T be a maximal path in tree T (how do i define maximal? should i specify that the path is finite?)
+    -- assume for contradiction that we have some neighbor y of x0, where y ≠ x1. this gives us two cases:
+        -- either y is contained in a path that links back up with the original path, so acyclicity is violated
+        -- or y is contained in a path that does not link back up, which then makes that new path an extension of the original, so maximality of p is violated
+            -- (these two things should probably be their own lemmas so we can just apply them to x0 and xk)
+    -- so then x0 does not have any neighbors besides x1, and therefore has degree 1
+    -- similar argument goes for xk, which gives us at least two vertices in T that are leaves
     sorry,
 end
 
--- if T is a tree on n ≥ 2 vertices and x is a leaf, then the graph obtained by removing x from T is a tree on n - 1 vertices
 
+/- Theorem 2: if T is a tree on n ≥ 2 vertices and x is a leaf, then the graph obtained by removing x from T is a tree on n - 1 vertices -/
 variable (x : V)
-
-
 /-lemma tree_rem_leaf_is_tree (t : tree T) (x : V) (h : T.leaf x) : tree (induced_subgraph T (λ v, v ≠ x)) :=
 begin
+    -- Proof outline:
+    -- let T' = T\{x}
+        -- T' does not contain cycles because T does not contain cycles
+            -- maybe make a lemma about induced subgraphs that says they contain some or all of the edges of T
+        -- T' is connected because we removed a leaf
+            -- this should also probably be a lemma of its own cause we need to remove leaves for Prüfer codes
     sorry,
 end-/
 
 
--- T is a tree → there exists a unique path between any two distinct vertices
+/- Theorem 3: TFAE
+    (a) T is a tree
+    (b) There exists a unique path between any two distinct vertices of T
+    (c) T is a connected graph on n vertices with n-1 edges
+    (d) T is an acyclic graph on n vertices with n-1 edges -/
+
+-- Proof outline:
+/- Lemma 1: (a) → (b) : T is a tree → there exists a unique path between any two distinct vertices -/
+-- Subproof outline:
+    -- let u,v be distinct vertices in T
+    -- T is a tree, so a uv path p exists
+    -- suppose for contradiction that another path uv path q exists, p ≠ q (negation of eq_of_vertices_eq?)
+    -- we have w in the path, where w is the last vertex before p and q diverge (maybe make a lemma for this)
+        -- (this doesn't cover the edge case that u is adjacent to v, which is false by the condition that we have a simple graph. this is a problem. fix the definition somehow)
+    -- p.last = q.last, so we must have a vertex w' in p,q (could be v) such that (figure out how to say this correctly) w'.tail ∈ p ∧ w'.tail ∈ q (also this should probably be a path lemma)
+    -- now, this means that we can build a path from w back to itself using the segments w to w' in p and q (do we have reversible paths in path.lean?)
 
 
--- there exists a unique path between any two distinct vertices → T is connected on n vertices with n - 1 edges
+/- Lemma 2: (b) → (c) : there exists a unique path between any two distinct vertices → T is connected on n vertices with n - 1 edges -/
+-- note: no mention of T being a tree here, so that's not one of our assumptions (and can be used on any simple graph i think)
+-- Subproof outline: (strong induction on V.card)
+    -- Base Case: trivially true for V.card = 1, but that's because we have no edges
+        -- this might be a problem - if we don't have loops, how can we say the individual vertex has a path to itself?
+        -- maybe need to show it's true for V.card = 2?
+    -- IH: assume the statement holds for V.card < n vertices
+    -- let V.card = n
+    -- let u,v be distinct vertices in T
+    -- by assumption, a uv path p exists
+    -- since p is unique, removing an edge x from p (and in fact the edge set of T. maybe new induced subgraph definition?) disconnects u from v
+    -- the resultant graph contains two components H and K on vertex sets U and W, where U.card < n and W.card < n, so by IH we have U.card - 1 edges in H and W.card - 1 edges in K, and U.card + W.card = n - 1, which gives us n - 2 edges in H ∪ K. then adding back x, we have n - 1 edges in T.
 
 
--- T is connected on n vertices with n - 1 edges → T is acyclic on n vertices with n - 1 edges
+/- Lemma 3: (c) → (d) : T is connected on n vertices with n - 1 edges → T is acyclic on n vertices with n - 1 edges -/
+-- note: no mention of T being a tree here, so that's not one of our assumptions (and can be used on any simple graph)
+-- Subproof outline:
+    -- suppose for contradiction that T has a cycle C of length k ≥ 3.
+    -- C contains k vertices and k edges (i think there are lemmas for this in path.lean)
+    -- since k ≤ n (by (c)), there are n - k vertices in T that are not in C
+    -- ∀ v : V, v ∉ C
+        -- consider a path connecting v to a vertex in C
+        -- each path will have at least 1 edge
+        -- the number of edges connecting the rest of the vertices in V to those in C is at least n - k
+        -- this means we have n - k + k = n ≤ edges in T, which is a contradiction
 
+/- Lemma 4: (d) → (a) : T is acyclic on n vertices with n - 1 edges → T is a tree -/ 
+-- note: this time we want to prove that T is a tree, so that's not one of our assumptions (and can be used on any simple graph)
+-- Subproof outline:
+    -- T is acyclic, V.card = n
+    -- suppose T has k ≥ 1 components T1, T2, ... , Tk (oh boy finset time)
+    -- since T is acyclic and components are connected, each Ti is a tree (say they're on Vi, and Vi.card = ni)
+    -- since each Ti is a tree, we can use (a) → (b) → (c) to get that each Ti has ni - 1 edges
+    -- therefore, T has ∑ (ni - 1) = (∑ ni) - k = n - k edges
+    -- since n - k = n - 1, we have k = 1, so we have 1 component (which is connected by definition of component)
+    -- the one component is all of T (make this a lemma about components)
+    -- therefore T is acyclic and connected, and must be a tree
 
--- T is acyclic on n vertices with n - 1 edges → T is a tree
-
--- i guess make a bunch of iff lemmas out of that
+-- i guess make a bunch of iff lemmas out of that so i can rw stuff
 
 -- make Prüfer codes
 
