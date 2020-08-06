@@ -39,7 +39,7 @@ by { cases l, { cases h_auto }, tidy, }
 end list
 
 namespace simple_graph
-variables (G : simple_graph V) [inhabited V]
+variables (G : simple_graph V) 
 
 /-- Morally, a path is an alternating list of vertices and edges, 
   with incidences between adjacent objects -/
@@ -77,7 +77,7 @@ def length : ℕ := p.tail.length
 @[simp] lemma vertices_length : p.vertices.length = p.length + 1 := by simp [path.vertices] 
 
 #check list.nth_eq_some
-lemma head_ne_tail_head  (h : p.tail ≠ list.nil) : p.head ≠ p.tail.head :=
+lemma head_ne_tail_head [inhabited V] (h : p.tail ≠ list.nil) : p.head ≠ p.tail.head :=
 begin
   rcases p.adj 0 _ with ⟨hp, _⟩, dsimp at hp, convert hp, 
   cases hp1 : p.tail, 
@@ -114,7 +114,7 @@ def empty (G : simple_graph V) (v : V) : G.path :=
   length_eq := rfl,
   adj := by rintros _ ⟨_⟩ }
 
-instance : inhabited G.path := { default := empty G (arbitrary V) }
+instance [inhabited V] : inhabited G.path := { default := empty G (arbitrary V) }
 
 @[simp]
 lemma empty_length (v : V) : (empty G v).length = 0 := by refl
@@ -165,7 +165,7 @@ begin
   any_goals {simp [empty, h]},
 end
 
-lemma cases_on' : 
+lemma cases_on' [inhabited V] : 
   (∃ v, p = empty G v) ∨
   ∃ (tl : G.path) v e (hs : tl.head ∈ e) (hv : v ∈ e) (hvp : v ≠ tl.head), p = tl.cons e hs hv hvp :=
 begin

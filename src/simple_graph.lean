@@ -353,10 +353,4 @@ by { intro v, simp }
 
 end finite
 
--- move this to tree file? other?
-def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
-{adj := λ a b, G.adj a b,
-sym := λ a b h, G.sym h, 
-loopless := λ x h, G.loopless x h}
-
 end simple_graph

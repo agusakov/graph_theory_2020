@@ -8,7 +8,12 @@ variables (V : Type u)
 
 namespace simple_graph
 
-variables {V} (T : simple_graph V) [inhabited V] [fintype V] [∀ (v : V), fintype (T.neighbor_set v)]
+def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
+{adj := λ a b, G.adj a b,
+sym := λ a b h, G.sym h, 
+loopless := λ x h, G.loopless x h}
+
+variables {V} (T : simple_graph V)
 
 def connected : Prop := ∀ (a b : V), ∃ (p : T.path), a = p.head ∧ b = p.last
 
@@ -17,11 +22,13 @@ def acyclic : Prop := ∀ (p : T.path), p.head ≠ p.last ∧ p.is_tour
 
 def tree : Prop := connected T ∧ acyclic T
 
-def leaf (v : V) : Prop := T.degree v = 1
+def leaf (v : V) [fintype (T.neighbor_set v)] : Prop := T.degree v = 1
+
+variables [∀ v, fintype (T.neighbor_set v)]
 
 -- every tree on n ≥ 2 vertices contains at least two vertices of degree 1
 
-lemma two_deg_one (t : tree T) (h : 2 ≤ fintype.card V) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.degree v₁ = 1 ∧ T.degree v₂ = 1 :=
+lemma two_deg_one (t : tree T) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
 begin
     -- let p = x0 x1 ... xk in T. maximal path in T? how do i define maximal 
     sorry,
@@ -29,11 +36,12 @@ end
 
 -- if T is a tree on n ≥ 2 vertices and x is a leaf, then the graph obtained by removing x from T is a tree on n - 1 vertices
 
-/-variables (x : V) (s : set.univ V) (S : induced_subgraph T (s\{x}))
+variable (x : V)
 
-lemma tree_rem_vertex_is_tree (t : tree T) (h : 2 ≤ fintype.card V) (x : V) (s : induced_subgraph T (set.univ\{x})) : tree (induced_subgraph T (set.univ\{x})) :=
+
+/-lemma tree_rem_leaf_is_tree (t : tree T) (x : V) (h : T.leaf x) : tree (induced_subgraph T (λ v, v ≠ x)) :=
 begin
-
+    sorry,
 end-/
 
 
