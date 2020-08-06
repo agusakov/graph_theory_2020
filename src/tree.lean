@@ -7,6 +7,7 @@ variables (V : Type u)
 
 -- TO DO:
     -- define components (they are used twice here), give them some lemmas
+open_locale classical
 
 namespace simple_graph
 
@@ -44,17 +45,35 @@ end
 
 
 /- Theorem 2: if T is a tree on n ≥ 2 vertices and x is a leaf, then the graph obtained by removing x from T is a tree on n - 1 vertices -/
-variable (x : V)
-/-lemma tree_rem_leaf_is_tree (t : tree T) (x : V) (h : T.leaf x) : tree (induced_subgraph T (λ v, v ≠ x)) :=
+-- this should probably be made with more general lemmas
+
+lemma acyclic_subgraph_acyclic (t : acyclic T) (s : set V) : acyclic (induced_subgraph V T s) :=
 begin
     -- Proof outline:
-    -- let T' = T\{x}
-        -- T' does not contain cycles because T does not contain cycles
-            -- maybe make a lemma about induced subgraphs that says they contain some or all of the edges of T
-        -- T' is connected because we removed a leaf
-            -- this should also probably be a lemma of its own cause we need to remove leaves for Prüfer codes
+    -- T has no cycles so T \ {x} has no cycles
     sorry,
-end-/
+end -- generalize to any subgraph once that's defined
+
+variable (x : V)
+lemma connected_rmleaf_connected (t : connected T) (x : V) (h : T.leaf x) : connected (induced_subgraph V T (λ v, v ≠ x)) :=
+begin
+    -- Proof outline:
+    -- T' is connected because we removed a leaf
+    sorry,
+end
+
+lemma tree_rmleaf_is_tree (t : tree T) (x : V) (h : T.leaf x) : tree (induced_subgraph V T (λ v, v ≠ x)) :=
+begin
+    rw tree,
+    rw tree at t,
+    cases t with tc ta,
+    split,
+    apply connected_rmleaf_connected,
+    exact tc,
+    exact h,
+    apply acyclic_subgraph_acyclic,
+    exact ta,
+end
 
 
 /- Theorem 3: TFAE
@@ -65,14 +84,24 @@ end-/
 
 -- Proof outline:
 /- Lemma 1: (a) → (b) : T is a tree → there exists a unique path between any two distinct vertices -/
+lemma tree_unique_path (t : tree T) (u v : V) (p : T.path) (q : T.path) : (p.head = q.head) ∧ (p.last = q.last) → p = q :=
+begin
 -- Subproof outline:
     -- let u,v be distinct vertices in T
     -- T is a tree, so a uv path p exists
+        -- we already have uv path guaranteed by definition of tree
+    intro h,
+    cases h with hh hl,
+    rw path.eq_of_vertices_eq,
     -- suppose for contradiction that another path uv path q exists, p ≠ q (negation of eq_of_vertices_eq?)
+    by_contra,
     -- we have w in the path, where w is the last vertex before p and q diverge (maybe make a lemma for this)
+        -- shit this is gonna be tricky
         -- (this doesn't cover the edge case that u is adjacent to v, which is false by the condition that we have a simple graph. this is a problem. fix the definition somehow)
     -- p.last = q.last, so we must have a vertex w' in p,q (could be v) such that (figure out how to say this correctly) w'.tail ∈ p ∧ w'.tail ∈ q (also this should probably be a path lemma)
     -- now, this means that we can build a path from w back to itself using the segments w to w' in p and q (do we have reversible paths in path.lean?)
+    sorry,
+end
 
 
 /- Lemma 2: (b) → (c) : there exists a unique path between any two distinct vertices → T is connected on n vertices with n - 1 edges -/
