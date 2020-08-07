@@ -7,36 +7,50 @@ variables (V : Type u)
 
 -- TO DO:
     -- define components (they are used twice here), give them some lemmas
+
+-- might be useful:
+    -- `finset.eq_singleton_iff_unique_mem` says `s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a`
+
 open_locale classical
 
 namespace simple_graph
 
 def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
-{adj := λ a b, G.adj a b,
-sym := λ a b h, G.sym h, 
-loopless := λ x h, G.loopless x h}
+{
+  adj := λ a b, G.adj a b,
+  sym := λ a b h, G.sym h, 
+  loopless := λ x h, G.loopless x h
+}
 
 variables {V} (T : simple_graph V)
 
 def connected : Prop := ∀ (a b : V), ∃ (p : T.path), a = p.head ∧ b = p.last
 
-def acyclic : Prop := ∀ (p : T.path), p.head ≠ p.last ∧ p.is_tour
+def acyclic : Prop := ∀ (p : T.path), ¬ p.simple_cycle
 
+class tree : Prop := 
+(connected : connected T)
+(acyclic : acyclic T)
 
-def tree : Prop := connected T ∧ acyclic T
+--def tree : Prop := connected T ∧ acyclic T
 
 def leaf (v : V) [fintype (T.neighbor_set v)] : Prop := T.degree v = 1
 
-variables [∀ v, fintype (T.neighbor_set v)]
+variables [∀ v, fintype (T.neighbor_set v)] [tree T]
+
+-- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size
+
 
 /- Theorem 1: every tree on n ≥ 2 vertices contains at least two vertices of degree 1 -/
-lemma two_deg_one (t : tree T) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
+lemma two_deg_one : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
 begin
     -- Proof outline:
     -- let p = x0 x1 ... xk in T be a maximal path in tree T (how do i define maximal? should i specify that the path is finite?)
+        -- use `p.tail.length` (number of edges in `p`)
     -- assume for contradiction that we have some neighbor y of x0, where y ≠ x1. this gives us two cases:
         -- either y is contained in a path that links back up with the original path, so acyclicity is violated
         -- or y is contained in a path that does not link back up, which then makes that new path an extension of the original, so maximality of p is violated
+            -- `p.cons e hp hs` is the path extending `p` by edge `e`.
             -- (these two things should probably be their own lemmas so we can just apply them to x0 and xk)
     -- so then x0 does not have any neighbors besides x1, and therefore has degree 1
     -- similar argument goes for xk, which gives us at least two vertices in T that are leaves
@@ -46,7 +60,7 @@ end
 
 /- Theorem 2: if T is a tree on n ≥ 2 vertices and x is a leaf, then the graph obtained by removing x from T is a tree on n - 1 vertices -/
 -- this should probably be made with more general lemmas
-
+section other
 lemma acyclic_subgraph_acyclic (t : acyclic T) (s : set V) : acyclic (induced_subgraph V T s) :=
 begin
     -- Proof outline:
@@ -55,25 +69,40 @@ begin
 end -- generalize to any subgraph once that's defined
 
 variable (x : V)
-lemma connected_rmleaf_connected (t : connected T) (x : V) (h : T.leaf x) : connected (induced_subgraph V T (λ v, v ≠ x)) :=
+
+--vertex_mem (v : V) (p : G.path) : Prop := v ∈ p.vertices
+
+-- is this actually useful? who knows
+lemma leaf_path_endpoint (p : T.path) (h1 : T.leaf x) (h2 : x ∈ p.vertices) : p.head = x ∨ p.last = x :=
 begin
-    -- Proof outline:
-    -- T' is connected because we removed a leaf
+    -- `rw mem_neighbor_finset` says `w ∈ G.neighbor_finset v ↔ G.adj v w`
+    unfold leaf at h1,
+    unfold degree at h1,
+    rw finset.card_eq_one at h1,
+    cases h1 with w hw,
+    rw finset.eq_singleton_iff_unique_mem at hw,
+    cases hw with hm hu,
+    -- reverse (head :: tail) to, well, reverse it
+    -- list.head (list.reverse (head :: tail) is the new list head
     sorry,
 end
 
-lemma tree_rmleaf_is_tree (t : tree T) (x : V) (h : T.leaf x) : tree (induced_subgraph V T (λ v, v ≠ x)) :=
+lemma connected_rmleaf_connected (t : connected T) {x : V} (h : T.leaf x) : connected (induced_subgraph V T (λ v, v ≠ x)) :=
 begin
-    rw tree,
-    rw tree at t,
-    cases t with tc ta,
-    split,
-    apply connected_rmleaf_connected,
-    exact tc,
-    exact h,
-    apply acyclic_subgraph_acyclic,
-    exact ta,
+    -- Proof outline:
+    -- there are uv paths for all u v in T
+    
+    -- if T.leaf x and x ∈ p, x must either be p.head or p.last
+        -- should this be its own sub-lemma?
+    sorry,
 end
+
+end other
+
+instance tree_rmleaf_is_tree {x : V} (h : T.leaf x) : tree (induced_subgraph V T (λ v, v ≠ x)) :=
+{ connected := T.connected_rmleaf_connected tree.connected h, 
+  acyclic := T.acyclic_subgraph_acyclic tree.acyclic _
+}
 
 
 /- Theorem 3: TFAE
@@ -84,7 +113,7 @@ end
 
 -- Proof outline:
 /- Lemma 1: (a) → (b) : T is a tree → there exists a unique path between any two distinct vertices -/
-lemma tree_unique_path (t : tree T) (u v : V) (p : T.path) (q : T.path) : (p.head = q.head) ∧ (p.last = q.last) → p = q :=
+lemma tree_unique_path [inhabited V] (t : tree T) (u v : V) (p : T.path) (q : T.path) : (p.head = q.head) ∧ (p.last = q.last) → p = q :=
 begin
 -- Subproof outline:
     -- let u,v be distinct vertices in T
@@ -95,7 +124,7 @@ begin
     rw path.eq_of_vertices_eq,
     -- suppose for contradiction that another path uv path q exists, p ≠ q (negation of eq_of_vertices_eq?)
     by_contra,
-    -- we have w in the path, where w is the last vertex before p and q diverge (maybe make a lemma for this)
+    -- there exists w s.t. w ∈ p and w ∈ q, where w is the last vertex before p and q diverge (maybe make a lemma for this)
         -- shit this is gonna be tricky
         -- (this doesn't cover the edge case that u is adjacent to v, which is false by the condition that we have a simple graph. this is a problem. fix the definition somehow)
     -- p.last = q.last, so we must have a vertex w' in p,q (could be v) such that (figure out how to say this correctly) w'.tail ∈ p ∧ w'.tail ∈ q (also this should probably be a path lemma)

@@ -208,7 +208,7 @@ begin
 end
 
 @[elab_as_eliminator]
-lemma induction_on 
+lemma induction_on [inhabited V]
   (P : G.path → Prop)
   (P_empty : ∀ v, P $ empty G v) 
   (P_inductive : ∀ p e hs {v} (hv : v ∈ e) (hsv), P p → P (p.cons e hs hv hsv)) : 
@@ -221,7 +221,7 @@ begin
 end
 
 
-lemma consecutive_vertex_ne {n} (h : n < p.length) : 
+lemma consecutive_vertex_ne [inhabited V] {n} (h : n < p.length) : 
 p.vertices.nth_le n (by { simp, linarith }) ≠ 
 p.vertices.nth_le (n+1) (by { simp, linarith }) :=
 begin
@@ -235,7 +235,7 @@ begin
   simp at hn, omega,
 end
 
-@[ext] lemma eq_of_vertices_eq (q : G.path) :  p = q ↔ p.vertices = q.vertices :=
+@[ext] lemma eq_of_vertices_eq [inhabited V] (q : G.path) :  p = q ↔ p.vertices = q.vertices :=
 { mp := by tidy,
   mpr := begin
     intro h, have h_tail : p.tail = q.tail,
@@ -270,6 +270,10 @@ def is_tour : Prop := list.nodup p.vertices
 
 /-- p.is_Eulerian if p hits each edge exactly once. -/
 def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
+
+structure simple_cycle : Prop :=
+(is_cycle : p.is_cycle)
+(is_tour : p.is_tour)
 
 end path
 
