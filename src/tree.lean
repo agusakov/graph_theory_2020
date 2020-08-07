@@ -22,6 +22,8 @@ def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
   loopless := λ x h, G.loopless x h
 }
 
+-- create some sort of type coercion for edges in subgraph and supergraph
+
 variables {V} (T : simple_graph V)
 
 def connected : Prop := ∀ (a b : V), ∃ (p : T.path), a = p.head ∧ b = p.last
@@ -73,7 +75,7 @@ variable (x : V)
 --vertex_mem (v : V) (p : G.path) : Prop := v ∈ p.vertices
 
 -- is this actually useful? who knows
-lemma leaf_path_endpoint (p : T.path) (h1 : T.leaf x) (h2 : x ∈ p.vertices) : p.head = x ∨ p.last = x :=
+/-lemma leaf_path_endpoint (p : T.path) (h1 : T.leaf x) (h2 : x ∈ p.vertices) : p.head = x ∨ p.last = x :=
 begin
     -- `rw mem_neighbor_finset` says `w ∈ G.neighbor_finset v ↔ G.adj v w`
     unfold leaf at h1,
@@ -85,15 +87,19 @@ begin
     -- reverse (head :: tail) to, well, reverse it
     -- list.head (list.reverse (head :: tail) is the new list head
     sorry,
-end
+end-/
 
 lemma connected_rmleaf_connected (t : connected T) {x : V} (h : T.leaf x) : connected (induced_subgraph V T (λ v, v ≠ x)) :=
 begin
     -- Proof outline:
     -- there are uv paths for all u v in T
     
-    -- if T.leaf x and x ∈ p, x must either be p.head or p.last
+    -- if T.leaf x and x ∈ p, x must either be p.head or p.last ?
         -- should this be its own sub-lemma?
+    -- T.connected means there are paths from every vertex to every vertex
+    unfold connected,
+    unfold connected at t,
+    intros h1 h2,
     sorry,
 end
 
