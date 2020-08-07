@@ -280,7 +280,10 @@ structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
---lemma tour_is_Eulerian : p.
+lemma tour_is_Eulerian : p.is_tour → p.is_trail :=
+begin
+  sorry,
+end
 
 end path
 
