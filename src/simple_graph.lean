@@ -121,8 +121,23 @@ end
 lemma edge_eq_edge_of_adj_iff (e : G.E) {v w} (h : G.adj v w) : 
   e = G.edge_of_adj h ↔ v ∈ e ∧ w ∈ e := 
 begin
-
-  sorry
+  cases e with e he,
+  rcases e with ⟨v', w'⟩,
+  change v' ◯⦃G⦄ w' at he,
+  split,
+  { intro H,
+    cases G with adj symm loopless,
+    dsimp at symm loopless h he,
+    unfold edge_of_adj at H,
+    rw H,
+    unfold has_mem.mem sym2.mem,
+    simp,
+    split,
+    use w, use v,
+    apply quotient.exact, 
+    -- how the fuck 
+    exact sym2.eq_swap },
+  { sorry }
 end
 
 @[simp]
