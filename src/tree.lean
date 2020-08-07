@@ -49,6 +49,7 @@ def acyclic : Prop := ∀ (p : T.path), ¬ p.simple_cycle
 class tree : Prop := 
 (connected : connected T)
 (acyclic : acyclic T)
+#check T.connected
 
 --def tree : Prop := connected T ∧ acyclic T
 
@@ -58,11 +59,17 @@ variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
 
 #check fintype.card
 
--- move this to simple_graph later
-lemma fin_max_path [fintype V] : ∃ (p : path T), p.is_maximal :=
+-- move this to simple_graph later (need to prove that `p.is_tour` and therefore `p.is_maximal` exists in any finite simple graph)
+lemma fin_max_path [fintype V] (h : 2 ≤ fintype.card V) : ∃ (p : path T), p.is_maximal :=
 begin
     -- show that if the number of vertices is finite then the path lengths are all finite
     -- use the fact that you have an upper bound for sets of integers
+    /-have h2 := fintype.exists_pair_of_one_lt_card h,
+    cases h2 with a hb,
+    cases hb with b h3,-/ -- don't think we want to pick arbitrary a and b
+    --have h4 := T.connected,
+    -- we're gonna need the bijection (λ (p : path), p.length) in order to find a maximum because then we can find a finite set on ℕ
+
     sorry,
 end
 

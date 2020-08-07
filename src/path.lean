@@ -274,7 +274,7 @@ def is_tour : Prop := list.nodup p.vertices
 def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
 
 /-- p.is_maximal if the length of p is greater than or equal to the length of every other path. -/
-def is_maximal : Prop := ∀ (q : path G), q.length ≤ p.length --should probably figure out some fintype stuff here lol
+def is_maximal : Prop := p.is_tour ∧ ∀ (q : path G), q.length ≤ p.length --should probably figure out some fintype stuff here lol
 
 structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
