@@ -1,3 +1,8 @@
+--universe u
+
+
+--instance complete_graph_adj_decidable (V : Type u) [decidable_eq V] :
+--#exit
 /-
 Copyright (c) 2020 Aaron Anderson, Jalex Stark, Kyle Miller. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -53,6 +58,15 @@ a `has_mem` instance.
 --(unique_edges : edge set not multiset?)
 namespace simple_graph
 
+-- notation for adj
+-- class has_splodge (α : Sort*) := { bigcirc : α → α → Prop }
+-- instance (α : Type u) [simple_graph α] : has_splodge α := 
+-- { bigcirc := @simple_graph.adj α _inst_1 }
+
+-- why can't I use exotic unicode in infix notation?
+-- binding power and associativity sent to default values
+--infix `◯`:37 := has_splodge.bigcirc
+notation v ` ◯⦃`:37 G `⦄ `:37 w := G.adj v w
 
 /--
 The complete graph on a type `V` is the simple graph with all pairs of distinct vertices adjacent.
@@ -68,8 +82,7 @@ def empty : simple_graph V :=
 
 -- @[simp] lemma empty_adj (v u : V) : (@empty V).adj v u ↔ false := by tidy
 
-instance : inhabited (simple_graph V) :=
-⟨@complete_graph V⟩
+instance : inhabited (simple_graph V) := ⟨@complete_graph V⟩
 
 instance complete_graph_adj_decidable (V : Type u) [decidable_eq V] :
   decidable_rel (@complete_graph V).adj :=
@@ -96,9 +109,13 @@ instance has_mem : has_mem V G.E := { mem := λ v e, v ∈ e.val }
 def edge_of_adj {v w : V} (h : G.adj v w) : G.E := ⟨⟦(v,w)⟧, h⟩
 
 lemma edge_eq_edge_of_adj (e : G.E): 
-  ∃ v w, ∃ (h : G.adj v w), e = G.edge_of_adj h := 
+  ∃ v w, ∃ (h : v ◯⦃G⦄ w), e = G.edge_of_adj h := 
 begin
-  sorry
+    cases e,
+    rcases e_val,
+    cases e_val with v w,
+    use [v, w, e_property],
+    refl
 end
 
 lemma edge_eq_edge_of_adj_iff (e : G.E) {v w} (h : G.adj v w) : 
