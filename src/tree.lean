@@ -90,6 +90,7 @@ begin
     -- so then x0 does not have any neighbors besides x1, and therefore has degree 1
     -- similar argument goes for xk, which gives us at least two vertices in T that are leaves
     sorry,
+    sorry,
 end
 
 

@@ -268,6 +268,7 @@ def is_trail : Prop := list.nodup p.edges
 
 /-- p.is_tour if p has no repeated vertices. -/
 def is_tour : Prop := list.nodup p.vertices
+-- maybe prove that `is_tour → is_Eulerian`
 
 /-- p.is_Eulerian if p hits each edge exactly once. -/
 def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
@@ -278,6 +279,8 @@ def is_maximal : Prop := ∀ (q : path G), q.length ≤ p.length --should probab
 structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
+
+--lemma tour_is_Eulerian : p.
 
 end path
 

@@ -210,6 +210,7 @@ lemma E.some_spec (e : G.E) : e.some ∈ e :=
 begin
   dsimp [E.some], 
   -- refine classical.some_spec _,
+  sorry,
 end
 
 variables [fintype V]
