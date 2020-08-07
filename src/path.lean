@@ -70,6 +70,7 @@ def vertices : list V := p.head :: p.tail
 
 /-- The number of edges in p. -/
 def length : ℕ := p.tail.length
+-- should probably make sure this doesn't become a problem if we run into infinite graphs?
 
 @[simp] lemma tail_length_eq : p.tail.length = p.length := rfl
 @[simp] lemma edges_length_eq : p.edges.length = p.length :=  by simp [p.length_eq]
@@ -270,6 +271,9 @@ def is_tour : Prop := list.nodup p.vertices
 
 /-- p.is_Eulerian if p hits each edge exactly once. -/
 def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
+
+/-- p.is_maximal if the length of p is greater than or equal to the length of every other path. -/
+def is_maximal : Prop := ∀ (q : path G), q.length ≤ p.length --should probably figure out some fintype stuff here lol
 
 structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)

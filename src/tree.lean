@@ -7,6 +7,7 @@ variables (V : Type u)
 
 -- TO DO:
     -- define components (they are used twice here), give them some lemmas
+    -- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size
 
 -- might be useful:
     -- `finset.eq_singleton_iff_unique_mem` says `s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a`
@@ -22,9 +23,24 @@ def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
   loopless := λ x h, G.loopless x h
 }
 
+--variables (s : set V) (S : simple_graph s)
+
+-- two ideas: 
+    -- `induced_subgraph.to_supergraph`
+    -- `simple_graph.to_induced_subgraph`
+
+/-def induced_subgraph.to_supergraph {S : simple_graph s} {G : simple_graph V} : S.E → G.E
+    | -/
+
+/-def path.to_supergraph {V : Type u} : T.path → S.path
+    | []     := ∅
+    | (h::t) := {h} ∪ list.to_set t-/
+
 -- create some sort of type coercion for edges in subgraph and supergraph
 
-variables {V} (T : simple_graph V)
+variables {V} (T : simple_graph V) (a b : V)
+
+#check T.adj a b
 
 def connected : Prop := ∀ (a b : V), ∃ (p : T.path), a = p.head ∧ b = p.last
 
@@ -38,16 +54,33 @@ class tree : Prop :=
 
 def leaf (v : V) [fintype (T.neighbor_set v)] : Prop := T.degree v = 1
 
-variables [∀ v, fintype (T.neighbor_set v)] [tree T]
+variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
 
--- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size
+#check fintype.card
 
+-- move this to simple_graph later
+lemma fin_max_path [fintype V] : ∃ (p : path T), p.is_maximal :=
+begin
+    -- show that if the number of vertices is finite then the path lengths are all finite
+    -- use the fact that you have an upper bound for sets of integers
+    sorry,
+end
 
 /- Theorem 1: every tree on n ≥ 2 vertices contains at least two vertices of degree 1 -/
-lemma two_deg_one : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
+lemma two_deg_one [fintype V] (h : 2 ≤ fintype.card V) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
 begin
     -- Proof outline:
-    -- let p = x0 x1 ... xk in T be a maximal path in tree T (how do i define maximal? should i specify that the path is finite?)
+    have h2 := fintype.exists_pair_of_one_lt_card h,
+    cases h2 with a hb,
+    cases hb with b h3,
+    use a,
+    use b,
+    split,
+    exact h3,
+    
+    split,
+    -- let p = x0 x1 ... xk in T be a maximal path in tree T
+        -- Sub-lemma : prove that maximal paths exist
         -- use `p.tail.length` (number of edges in `p`)
     -- assume for contradiction that we have some neighbor y of x0, where y ≠ x1. this gives us two cases:
         -- either y is contained in a path that links back up with the original path, so acyclicity is violated
