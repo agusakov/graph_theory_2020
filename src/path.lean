@@ -282,6 +282,9 @@ structure simple_cycle : Prop :=
 
 lemma tour_is_Eulerian : p.is_tour → p.is_trail :=
 begin
+  intro h,
+  unfold is_trail,
+  unfold is_tour at h,
   sorry,
 end
 
