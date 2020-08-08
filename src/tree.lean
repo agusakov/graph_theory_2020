@@ -1,4 +1,5 @@
 import path
+import graph_induction
 
 -- from math 688 notes, lec-19
 
@@ -8,6 +9,7 @@ variables (V : Type u)
 -- TO DO:
     -- define components (they are used twice here), give them some lemmas
     -- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size
+    -- concrete development of the category of graphs so we can prove useful properties (see Hedetniemi branch)
 
 -- might be useful:
     -- `finset.eq_singleton_iff_unique_mem` says `s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a`
@@ -22,6 +24,8 @@ def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
   sym := λ a b h, G.sym h, 
   loopless := λ x h, G.loopless x h
 }
+
+-- define map from graph to subgraph, use `is_subgraph` property from graph_induction.lean
 
 --variables (s : set V) (S : simple_graph s)
 
@@ -62,6 +66,7 @@ variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
 -- move this to simple_graph later (need to prove that `p.is_tour` and therefore `p.is_maximal` exists in any finite simple graph)
 lemma fin_max_path [fintype V] (h : 2 ≤ fintype.card V) : ∃ (p : path T), p.is_maximal :=
 begin
+    
     -- show that if the number of vertices is finite then the path lengths are all finite
     -- use the fact that you have an upper bound for sets of integers
     /-have h2 := fintype.exists_pair_of_one_lt_card h,
