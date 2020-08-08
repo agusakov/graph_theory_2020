@@ -324,7 +324,7 @@ begin
   contrapose! hf, subst hf,
   suffices : v ∉ tl.vertices, contrapose! this,
   apply edge_path_mem_vertices this hv,
-  
+  -- i think this may be impossible to prove at this point and i don't know where it all went wrong
 
     -- something like `apply h`, 
   sorry
