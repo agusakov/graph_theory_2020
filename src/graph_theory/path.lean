@@ -280,11 +280,14 @@ structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
-lemma tour_is_Eulerian : p.is_tour → p.is_trail :=
+lemma tour_is_trail : p.is_tour → p.is_trail :=
 begin
   intro h,
   unfold is_trail,
   unfold is_tour at h,
+  -- vertices are all pairwise ne
+  -- edges are defined by their vertices `edge_of_adj`
+  -- edges are equal iff endpoints are equal `edge_eq_iff'`
   sorry,
 end
 
