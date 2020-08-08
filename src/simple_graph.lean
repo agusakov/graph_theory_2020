@@ -168,8 +168,6 @@ begin
     cases h rfl }
 end
 
-#check sym2
-
 @[simp]
 lemma mem_of_adj {v w : V} (h : G.adj v w) :
   v ∈ G.edge_of_adj h := sym2.mk_has_mem v w
@@ -252,7 +250,6 @@ instance E.inhabited [inhabited {p : V × V | G.adj p.1 p.2}] : inhabited G.E :=
   rcases inhabited.default {p : V × V | G.adj p.1 p.2} with ⟨⟨x, y⟩, h⟩,
   use ⟦(x, y)⟧, rwa sym2.from_rel_prop,
 end⟩
-#check sym2
 
 instance edges_fintype [decidable_eq V] [fintype V] [decidable_rel G.adj] :
   fintype G.E := subtype.fintype _
@@ -261,19 +258,37 @@ section classical
 open_locale classical
 noncomputable theory 
 
-def E.some (e : G.E) : V := 
+theorem E.exists_non_canonical_directed_structure (e : G.E) :
+(∃ v w : V, e.val = sym2.mk v w) :=
 begin
-  suffices : ∃ v, v ∈ e,
-  exact classical.some this,
-  sorry
+  cases e with e he,
+  let vw := quotient.out e,
+  use [vw.1, vw.2],
+  change _ = quotient.mk (prod.mk vw.fst vw.snd),
+  dsimp,
+  convert (quotient.out_eq e).symm,
+  show _ = vw,
+  generalize : vw = k,
+  cases k, refl,
 end
 
-lemma E.some_spec (e : G.E) : e.some ∈ e := 
+def E.nonempty (e : G.E) : ∃ v : V, v ∈ e :=
 begin
-  dsimp [E.some], 
-  -- refine classical.some_spec _,
-  sorry,
+  rcases E.exists_non_canonical_directed_structure e
+    with ⟨v, w, h⟩,
+  use v,
+  cases e with e he,
+  dsimp at *,
+  subst h,
+  use w,
+  simp, refl
 end
+
+def E.some (e : G.E) : V := 
+classical.some (E.nonempty e)
+
+lemma E.some_spec (e : G.E) : e.some ∈ e := 
+classical.some_spec (E.nonempty e)
 
 variables [fintype V]
 
