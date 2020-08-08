@@ -69,6 +69,8 @@ def sym2 (α : Type u) := quotient (sym2.rel.setoid α)
 
 namespace sym2
 
+def mk (a b : α) : sym2 α := ⟦(a, b)⟧
+
 lemma eq_swap {a b : α} : ⟦(a, b)⟧ = ⟦(b, a)⟧ :=
 by { rw quotient.eq, apply rel.swap }
 

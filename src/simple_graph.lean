@@ -68,6 +68,14 @@ namespace simple_graph
 --infix `◯`:37 := has_splodge.bigcirc
 notation v ` ◯⦃`:37 G `⦄ `:37 w := G.adj v w
 
+def adj_ne {X : Type u} (G : simple_graph X) (v w : X)
+  (h : v ◯⦃G⦄ w) : v ≠ w :=
+begin
+  rintro rfl,
+  apply G.loopless v h,
+end
+
+
 /--
 The complete graph on a type `V` is the simple graph with all pairs of distinct vertices adjacent.
 -/
@@ -101,6 +109,12 @@ The edges of G consist of the unordered pairs of vertices related by
 `G.adj`.  It is given as a subtype of the symmetric square.
 -/
 def E : Type u := {x : sym2 V // x ∈ sym2.from_rel G.sym}
+
+@[ext] theorem E.ext {a b : E G} : a.1 = b.1 → a = b :=
+by { cases a, cases b, simp }
+
+@[ext] theorem E.ext_iff (a b : E G) : a = b ↔ a.1 = b.1 :=
+⟨λ h, by cases h; refl, E.ext G⟩
 
 /-- Allows us to refer to a vertex being a member of an edge. -/
 instance has_mem : has_mem V G.E := { mem := λ v e, v ∈ e.val }
@@ -137,7 +151,21 @@ begin
     apply quotient.exact, 
     -- how the fuck 
     exact sym2.eq_swap },
-  { sorry }
+  { rintro ⟨hv,hw⟩,
+    cases hv with v hv,
+    cases hw with w hw,
+    ext,
+    apply sym2.eq_iff.2,
+    cases sym2.eq_iff.1 hv;
+    cases sym2.eq_iff.1 hw; try {cc},
+    replace h := adj_ne _ _ _ h,
+    cc,
+    clear hv hw,
+    replace he := adj_ne _ _ _ he,
+    rcases h_1 with ⟨rfl, rfl⟩,
+    rcases h_2 with ⟨rfl, rfl⟩,
+    replace h := adj_ne _ _ _ h,
+    cases h rfl }
 end
 
 @[simp]
@@ -222,7 +250,6 @@ instance E.inhabited [inhabited {p : V × V | G.adj p.1 p.2}] : inhabited G.E :=
   rcases inhabited.default {p : V × V | G.adj p.1 p.2} with ⟨⟨x, y⟩, h⟩,
   use ⟦(x, y)⟧, rwa sym2.from_rel_prop,
 end⟩
-#check sym2
 
 instance edges_fintype [decidable_eq V] [fintype V] [decidable_rel G.adj] :
   fintype G.E := subtype.fintype _
@@ -231,19 +258,37 @@ section classical
 open_locale classical
 noncomputable theory 
 
-def E.some (e : G.E) : V := 
+theorem E.exists_non_canonical_directed_structure (e : G.E) :
+(∃ v w : V, e.val = sym2.mk v w) :=
 begin
-  suffices : ∃ v, v ∈ e,
-  exact classical.some this,
-  sorry
+  cases e with e he,
+  let vw := quotient.out e,
+  use [vw.1, vw.2],
+  change _ = quotient.mk (prod.mk vw.fst vw.snd),
+  dsimp,
+  convert (quotient.out_eq e).symm,
+  show _ = vw,
+  generalize : vw = k,
+  cases k, refl,
 end
 
-lemma E.some_spec (e : G.E) : e.some ∈ e := 
+def E.nonempty (e : G.E) : ∃ v : V, v ∈ e :=
 begin
-  dsimp [E.some], 
-  -- refine classical.some_spec _,
-  sorry,
+  rcases E.exists_non_canonical_directed_structure e
+    with ⟨v, w, h⟩,
+  use v,
+  cases e with e he,
+  dsimp at *,
+  subst h,
+  use w,
+  simp, refl
 end
+
+def E.some (e : G.E) : V := 
+classical.some (E.nonempty e)
+
+lemma E.some_spec (e : G.E) : e.some ∈ e := 
+classical.some_spec (E.nonempty e)
 
 variables [fintype V]
 
