@@ -237,6 +237,14 @@ begin
   simp at hn, omega,
 end
 
+
+lemma consecutive_edge_ne [inhabited V] {n} (h : n < p.length) : 
+p.edges.nth_le n (by { simp, linarith }) ≠ 
+p.edges.nth_le (n+1) (by { simp, sorry, }) :=
+begin
+  sorry,
+end
+
 @[ext] lemma eq_of_vertices_eq [inhabited V] (q : G.path) :  p = q ↔ p.vertices = q.vertices :=
 { mp := by tidy,
   mpr := begin
@@ -281,7 +289,7 @@ structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
-example {V : Type u}
+/-example {V : Type u}
   {G : simple_graph V}
   (p : G.path)
   [inhabited V]
@@ -299,6 +307,14 @@ example {V : Type u}
 begin
   contrapose! h,
   subst hd, 
+end-/
+
+
+-- should have this lemma
+lemma edge_path_mem_vertices {p : G.path} {e : G.E} {u : V} (h1 : e ∈ p.edges) : u ∈ e → (u ∈ p.vertices) :=
+begin
+  --apply p.adj,
+  sorry,
 end
 
 lemma tour_is_trail [inhabited V] : p.is_tour → p.is_trail :=
@@ -307,14 +323,17 @@ begin
   unfold is_trail,
   unfold is_tour at h, 
   unfold list.nodup,  
-  apply p.induction_on,
+  /-apply p.induction_on, -- this seems to be where it all goes wrong
   { intro, rw list.pairwise_iff, simp },
+  intros,
   intros, rw list.pairwise_iff, right, 
   use [hd, tl.edges], 
   split, swap, { tauto },
   intros f hf, 
   contrapose! hf, subst hf,
   suffices : v ∉ tl.vertices, contrapose! this,
+  apply edge_path_mem_vertices this hv,-/
+  -- i think this may be impossible to prove at this point and i don't know where it all went wrong
 
     -- something like `apply h`, 
   sorry
@@ -325,4 +344,3 @@ end
 end path
 
 end simple_graph
-#lint-

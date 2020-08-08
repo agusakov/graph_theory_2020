@@ -10,6 +10,7 @@ variables (V : Type u)
     -- define components (they are used twice here), give them some lemmas
     -- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size
     -- concrete development of the category of graphs so we can prove useful properties (see Hedetniemi branch)
+    -- replace (h : 2 ≤ fintype.card V) with [nontrivial V]
 
 -- might be useful:
     -- `finset.eq_singleton_iff_unique_mem` says `s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a`
