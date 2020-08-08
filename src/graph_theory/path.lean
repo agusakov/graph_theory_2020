@@ -237,6 +237,14 @@ begin
   simp at hn, omega,
 end
 
+
+lemma consecutive_edge_ne [inhabited V] {n} (h : n < p.length) : 
+p.edges.nth_le n (by { simp, linarith }) ≠ 
+p.edges.nth_le (n+1) (by { simp, sorry, }) :=
+begin
+  sorry,
+end
+
 @[ext] lemma eq_of_vertices_eq [inhabited V] (q : G.path) :  p = q ↔ p.vertices = q.vertices :=
 { mp := by tidy,
   mpr := begin
@@ -315,15 +323,16 @@ begin
   unfold is_trail,
   unfold is_tour at h, 
   unfold list.nodup,  
-  apply p.induction_on,
+  /-apply p.induction_on, -- this seems to be where it all goes wrong
   { intro, rw list.pairwise_iff, simp },
+  intros,
   intros, rw list.pairwise_iff, right, 
   use [hd, tl.edges], 
   split, swap, { tauto },
   intros f hf, 
   contrapose! hf, subst hf,
   suffices : v ∉ tl.vertices, contrapose! this,
-  apply edge_path_mem_vertices this hv,
+  apply edge_path_mem_vertices this hv,-/
   -- i think this may be impossible to prove at this point and i don't know where it all went wrong
 
     -- something like `apply h`, 
