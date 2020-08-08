@@ -281,7 +281,7 @@ structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
-example {V : Type u}
+/-example {V : Type u}
   {G : simple_graph V}
   (p : G.path)
   [inhabited V]
@@ -299,9 +299,17 @@ example {V : Type u}
 begin
   contrapose! h,
   subst hd, 
+end-/
+
+
+-- should have this lemma
+lemma edge_path_mem_vertices {p : G.path} {e : G.E} {u : V} (h1 : e ∈ p.edges) : u ∈ e → (u ∈ p.vertices) :=
+begin
+  --apply p.adj,
+  sorry,
 end
 
-lemma tour_is_trail [inhabited V] : p.is_tour → p.is_trail :=
+/-lemma tour_is_trail [inhabited V] : p.is_tour → p.is_trail :=
 begin
   intro h,
   unfold is_trail,
@@ -315,10 +323,12 @@ begin
   intros f hf, 
   contrapose! hf, subst hf,
   suffices : v ∉ tl.vertices, contrapose! this,
+  apply edge_path_mem_vertices this hv,
+  
 
     -- something like `apply h`, 
   sorry
-end
+end-/
 
 
 
