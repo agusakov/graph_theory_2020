@@ -38,7 +38,7 @@ def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
 
 -- create some sort of type coercion for edges in subgraph and supergraph
 
-variables {V} (T : simple_graph V) (a b : V)
+variables {V} (T : simple_graph V) (a b : V) --(S : simple_graph (λ v, v ≠ a))
 
 #check T.adj a b
 
