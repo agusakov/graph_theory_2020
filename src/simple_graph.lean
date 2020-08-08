@@ -53,7 +53,6 @@ a `has_mem` instance.
 --(unique_edges : edge set not multiset?)
 namespace simple_graph
 
-
 /--
 The complete graph on a type `V` is the simple graph with all pairs of distinct vertices adjacent.
 -/

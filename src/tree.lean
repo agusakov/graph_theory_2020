@@ -7,7 +7,7 @@ variables (V : Type u)
 
 -- TO DO:
     -- define components (they are used twice here), give them some lemmas
-    -- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size (generalizes `instance tree_rmleaf_is_tree`)
+    -- prove that removing a vertex from a tree results in a graph whose components are trees with smaller size
 
 -- might be useful:
     -- `finset.eq_singleton_iff_unique_mem` says `s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a`
