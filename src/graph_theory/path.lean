@@ -1,4 +1,4 @@
-import simple_graph
+import .basic
 
 universes u
 variables {V : Type u}
@@ -108,6 +108,7 @@ instance has_mem_vertices : has_mem V G.path :=
 variables (p)
 
 /-- The empty path based at vertex v. -/
+@[simps]
 def empty (G : simple_graph V) (v : V) : G.path :=
 { head := v,
   tail := list.nil,
@@ -212,7 +213,7 @@ end
 lemma induction_on [inhabited V]
   (P : G.path → Prop)
   (P_empty : ∀ v, P $ empty G v) 
-  (P_inductive : ∀ p e hs {v} (hv : v ∈ e) (hsv), P p → P (p.cons e hs hv hsv)) : 
+  (P_inductive : ∀ tl hd hs {v} (hv : v ∈ hd) (hsv), P tl → P (tl.cons hd hs hv hsv)) : 
 P p :=
 begin
   suffices : ∀ k (q : G.path), q.length = k → P q, { apply this p.length, refl },
@@ -280,17 +281,48 @@ structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
-lemma tour_is_trail : p.is_tour → p.is_trail :=
+example {V : Type u}
+  {G : simple_graph V}
+  (p : G.path)
+  [inhabited V]
+  (h : p.vertices.nodup)
+  (tl : G.path)
+  (hd : G.E)
+  (hs : tl.head ∈ hd)
+  {v : V}
+  (hv : v ∈ hd)
+  (hsv : v ≠ tl.head)
+  (a : list.pairwise ne tl.edges)
+  (f : G.E)
+  (hf : f ∈ tl.edges) :
+  hd ≠ f :=
+begin
+  contrapose! h,
+  subst hd, 
+end
+
+lemma tour_is_trail [inhabited V] : p.is_tour → p.is_trail :=
 begin
   intro h,
   unfold is_trail,
-  unfold is_tour at h,
-  -- vertices are all pairwise ne
-  -- edges are defined by their vertices `edge_of_adj`
-  -- edges are equal iff endpoints are equal `edge_eq_iff'`
-  sorry,
+  unfold is_tour at h, 
+  unfold list.nodup,  
+  apply p.induction_on,
+  { intro, rw list.pairwise_iff, simp },
+  intros, rw list.pairwise_iff, right, 
+  use [hd, tl.edges], 
+  split, swap, { tauto },
+  intros f hf, 
+  contrapose! hf, subst hf,
+  suffices : v ∉ tl.vertices, contrapose! this,
+
+    -- something like `apply h`, 
+  sorry
 end
+
+
 
 end path
 
 end simple_graph
+#lint-

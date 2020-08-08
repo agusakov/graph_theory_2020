@@ -192,6 +192,12 @@ begin
   convert sym2.mk_has_mem_right _ _; tauto,
 end
 
+
+lemma E.other_adj (e : G.E) {v : V} (h : v ∈ e) : G.adj v $ e.other h :=
+begin
+  sorry
+end
+
 lemma E.other_ne (e : G.E) {v : V} (h : v ∈ e) : e.other h ≠ v :=
 begin
   have key := e.property,

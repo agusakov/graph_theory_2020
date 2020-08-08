@@ -1,5 +1,5 @@
-import path
-import graph_induction
+import .path
+import .graph_induction
 
 -- from math 688 notes, lec-19
 
@@ -17,28 +17,6 @@ variables (V : Type u)
 open_locale classical
 
 namespace simple_graph
-
-def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
-{
-  adj := λ a b, G.adj a b,
-  sym := λ a b h, G.sym h, 
-  loopless := λ x h, G.loopless x h
-}
-
--- define map from graph to subgraph, use `is_subgraph` property from graph_induction.lean
-
---variables (s : set V) (S : simple_graph s)
-
--- two ideas: 
-    -- `induced_subgraph.to_supergraph`
-    -- `simple_graph.to_induced_subgraph`
-
-/-def induced_subgraph.to_supergraph {S : simple_graph s} {G : simple_graph V} : S.E → G.E
-    | -/
-
-/-def path.to_supergraph {V : Type u} : T.path → S.path
-    | []     := ∅
-    | (h::t) := {h} ∪ list.to_set t-/
 
 -- create some sort of type coercion for edges in subgraph and supergraph
 
