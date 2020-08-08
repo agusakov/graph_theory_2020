@@ -309,7 +309,7 @@ begin
   sorry,
 end
 
-/-lemma tour_is_trail [inhabited V] : p.is_tour → p.is_trail :=
+lemma tour_is_trail [inhabited V] : p.is_tour → p.is_trail :=
 begin
   intro h,
   unfold is_trail,
@@ -328,11 +328,10 @@ begin
 
     -- something like `apply h`, 
   sorry
-end-/
+end
 
 
 
 end path
 
 end simple_graph
-#lint-
