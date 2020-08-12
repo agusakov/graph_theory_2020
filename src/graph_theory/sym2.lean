@@ -198,11 +198,27 @@ Symmetric relations define a set on `sym2 α` by taking all those pairs
 of elements that are related.
 -/
 def from_rel (sym : symmetric r) : set (sym2 α) :=
-λ z, quotient.rec_on z (λ z, r z.1 z.2) (by { rintros _ _ ⟨_,_⟩, tidy })
+(quotient.mk : α × α → sym2 α) '' (uncurry r)
+--λ z, quotient.rec_on z (λ z, r z.1 z.2) (by { rintros _ _ ⟨_,_⟩, tidy })
 
 @[simp]
 lemma from_rel_proj_prop {sym : symmetric r} {z : α × α} :
-  ⟦z⟧ ∈ from_rel sym ↔ r z.1 z.2 := by tidy
+  ⟦z⟧ ∈ from_rel sym ↔ r z.1 z.2 :=
+begin
+  cases z,
+  dsimp,
+  split,
+  { intro h,
+    rcases h with ⟨⟨a,b⟩,h,h1⟩,
+    replace h1 := quotient.exact h1,
+    cases h1, exact h,
+    apply sym, exact h,
+  },
+  { intro h,
+    use (z_fst, z_snd),
+    use h }
+end
+
 
 @[simp]
 lemma from_rel_prop {sym : symmetric r} {a b : α} :
