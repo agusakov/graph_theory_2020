@@ -1,4 +1,4 @@
-import tree
+import .tree
 
 -- from math 688 notes, lec-19
 

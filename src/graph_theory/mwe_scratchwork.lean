@@ -1,59 +1,46 @@
-import tactic
-import sym2
+import .basic
+import .path
 
-universe u
-variables (V : Type u)
-
-structure simple_graph :=
-(adj : V → V → Prop)
-(sym : symmetric adj . obviously)
-(loopless : irreflexive adj . obviously)
+universes u
+variables {V : Type u}
 
 namespace simple_graph
+variables (G : simple_graph V) 
 
-def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
-{adj := λ a b, G.adj a b,
-sym := λ a b h, G.sym h, 
-loopless := λ x h, G.loopless x h}
-
-variables {V} (T : simple_graph V)
-
-def E : Type u := {x : sym2 V // x ∈ sym2.from_rel T.sym}
-
-instance has_mem : has_mem V T.E := { mem := λ v e, v ∈ e.val }
-
-structure path :=
-(head : V)
-(tail : list V)
-(edges : list T.E)
-(length_eq : edges.length = tail.length)
-(adj : ∀ (n : ℕ) (hn : n < edges.length), 
-  let u := (list.cons head tail).nth_le n (by { simp; omega }) in
-  let v := (list.cons head tail).nth_le (n + 1) (by { simp, cc }) in
-  u ≠ v ∧ u ∈ edges.nth_le n hn ∧ v ∈ edges.nth_le n hn)
 
 namespace path
-variables {T} 
-variables (p : T.path)
+variables {G} 
+variables (p : G.path)
 
-def vertices : list V := p.head :: p.tail 
-
-def is_tour : Prop := list.nodup p.vertices
-
-section classical
-open_locale classical
-noncomputable def last : V := if h : p.tail = list.nil then p.head else p.tail.last h
-
-end classical
-end path
-
-def acyclic : Prop := ∀ (p : T.path), p.head ≠ p.last ∧ p.is_tour
-
-lemma acyclic_subgraph_acyclic (t : acyclic T) (s : set V) : acyclic (induced_subgraph V T s) :=
+/- length of path.is_tour is less than the cardinality of V -/
+lemma tour_lt_card [fintype V] : ∀ (p : path G) (hp : p.is_tour), p.length ≤ fintype.card V :=
 begin
-    -- Proof outline:
-    -- T has no cycles so T \ {x} has no cycles
-    sorry,
+  intros,
+  unfold is_tour at hp,
+  have h := p.vertices,
+  -- p contains vertices of V
+  -- vertices in p don't repeat
+  -- there are `V.card` vertices
+  sorry,
 end
 
+instance : has_Sup {n : ℕ | ∃ (p : G.path), p.is_tour ∧ p.length = n} :=
+begin
+  
+  sorry,
+end
+
+/- there exists a path, path.is_tour, s.t. path.is_maximal -/
+-- CR : can be generalized to infinite graphs
+lemma fin_max_tour [fintype V] [nonempty V]: ∃ (p : path G), p.is_maximum :=
+begin
+  have s := {n : ℕ | ∃ (p : G.path), p.is_tour ∧ p.length = n},
+  --have h2 : ∀ n ∈ s, n ≤ fintype.card V := 
+  sorry,
+end
+
+end path
+
 end simple_graph
+#lint
+-- CR : there are unused arguments, they are there because I will need to use them once I figure out the proofs lol
