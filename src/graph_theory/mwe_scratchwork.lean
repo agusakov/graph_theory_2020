@@ -13,7 +13,7 @@ variables {G}
 variables (p : G.path)
 
 /- length of path.is_tour is less than the cardinality of V -/
-lemma tour_lt_card [fintype V] : ∀ (p : path G) (hp : p.is_tour), p.length ≤ fintype.card V :=
+lemma tour_lt_card [fintype V] : ∀ (p : path G) (hp : p.is_tour), p.length < fintype.card V :=
 begin
   intros,
   unfold is_tour at hp,
