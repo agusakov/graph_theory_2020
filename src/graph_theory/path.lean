@@ -277,22 +277,39 @@ def is_trail : Prop := list.nodup p.edges
 
 /-- p.is_tour if p has no repeated vertices. -/
 def is_tour : Prop := list.nodup p.vertices
--- maybe prove that `is_tour → is_trail`
+-- maybe prove that `is_tour → is_Eulerian`
 
 /-- p.is_Eulerian if p hits each edge exactly once. -/
 def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
 
-/-- p.is_Hamiltonian if p hits each vertex exactly once. -/
-def is_Hamiltonian : Prop := p.is_tour ∧ ∀ v : V, p.vertex_mem v
-
-/-- p.is_maximum if the length of p is greater than or equal to the length of every other path. -/
-def is_maximum : Prop := p.is_tour ∧ ∀ (q : path G), q.length ≤ p.length
+/-- p.is_maximal if the length of p is greater than or equal to the length of every other path. -/
+def is_maximal : Prop := p.is_tour ∧ ∀ (q : path G), q.length ≤ p.length --should probably figure out some fintype stuff here lol
 
 structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
-/-
+/-example {V : Type u}
+  {G : simple_graph V}
+  (p : G.path)
+  [inhabited V]
+  (h : p.vertices.nodup)
+  (tl : G.path)
+  (hd : G.E)
+  (hs : tl.head ∈ hd)
+  {v : V}
+  (hv : v ∈ hd)
+  (hsv : v ≠ tl.head)
+  (a : list.pairwise ne tl.edges)
+  (f : G.E)
+  (hf : f ∈ tl.edges) :
+  hd ≠ f :=
+begin
+  contrapose! h,
+  subst hd, 
+end-/
+
+
 -- should have this lemma
 lemma edge_path_mem_vertices {p : G.path} {e : G.E} {u : V} (h1 : e ∈ p.edges) : u ∈ e → (u ∈ p.vertices) :=
 begin
@@ -306,21 +323,24 @@ begin
   unfold is_trail,
   unfold is_tour at h, 
   unfold list.nodup,  
+  /-apply p.induction_on, -- this seems to be where it all goes wrong
+  { intro, rw list.pairwise_iff, simp },
+  intros,
+  intros, rw list.pairwise_iff, right, 
+  use [hd, tl.edges], 
+  split, swap, { tauto },
+  intros f hf, 
+  contrapose! hf, subst hf,
+  suffices : v ∉ tl.vertices, contrapose! this,
+  apply edge_path_mem_vertices this hv,-/
+  -- i think this may be impossible to prove at this point and i don't know where it all went wrong
+
+    -- something like `apply h`, 
   sorry
 end
 
-lemma hamiltonian_eq_card [fintype V] (p : path G) (hp : p.is_tour): 
-p.vertices.length = fintype.card V → p.is_Hamiltonian :=
-begin
-  intro heq,
-  sorry,
-end-/
 
 
 end path
 
-def connected : Prop := ∀ (a b : V), ∃ (p : G.path), a = p.head ∧ b = p.last
-
 end simple_graph
-#lint
--- CR : several doc strings missing, there are unused arguments, and there are "inhabited" instances. check back with Michael's repo

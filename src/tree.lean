@@ -65,7 +65,7 @@ variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
 #check fintype.card
 
 -- move this to simple_graph later (need to prove that `p.is_tour` and therefore `p.is_maximal` exists in any finite simple graph)
-lemma fin_max_tour [fintype V] [nontrivial V]: ∃ (p : path T), p.is_tour :=
+lemma fin_max_path [fintype V] (h : 2 ≤ fintype.card V) : ∃ (p : path T), p.is_maximal :=
 begin
     
     -- show that if the number of vertices is finite then the path lengths are all finite

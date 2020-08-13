@@ -67,5 +67,3 @@ begin
 end
 
 end simple_graph
-#lint
--- CR : several doc strings missing and there are unused arguments, check back with Michael's repo

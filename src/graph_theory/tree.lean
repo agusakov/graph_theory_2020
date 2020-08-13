@@ -1,6 +1,5 @@
 import .path
 import .graph_induction
-import .subgraph
 
 -- from math 688 notes, lec-19
 
@@ -25,6 +24,8 @@ variables {V} (T : simple_graph V) (a b : V) --(S : simple_graph (λ v, v ≠ a)
 
 #check T.adj a b
 
+def connected : Prop := ∀ (a b : V), ∃ (p : T.path), a = p.head ∧ b = p.last
+
 def acyclic : Prop := ∀ (p : T.path), ¬ p.simple_cycle
 
 class tree : Prop := 
@@ -41,7 +42,7 @@ variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
 #check fintype.card
 
 -- move this to simple_graph later (need to prove that `p.is_tour` and therefore `p.is_maximal` exists in any finite simple graph)
-lemma fin_max_path [fintype V] (h : 2 ≤ fintype.card V) : ∃ (p : path T), p.is_maximum :=
+lemma fin_max_path [fintype V] (h : 2 ≤ fintype.card V) : ∃ (p : path T), p.is_maximal :=
 begin
     
     -- show that if the number of vertices is finite then the path lengths are all finite
@@ -58,16 +59,16 @@ end
 /- Theorem 1: every tree on n ≥ 2 vertices contains at least two vertices of degree 1 -/
 lemma two_deg_one [fintype V] (h : 2 ≤ fintype.card V) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
 begin
-    /- 
-    have h3 := path.fin_max_tour,
+    -- Proof outline:
     have h2 := fintype.exists_pair_of_one_lt_card h,
     cases h2 with a hb,
     cases hb with b h3,
     use a,
     use b,
     split,
-    exact h3, -/
-    -- Proof outline:
+    exact h3,
+    
+    split,
     -- let p = x0 x1 ... xk in T be a maximal path in tree T
         -- Sub-lemma : prove that maximal paths exist
         -- use `p.tail.length` (number of edges in `p`)
@@ -79,18 +80,19 @@ begin
     -- so then x0 does not have any neighbors besides x1, and therefore has degree 1
     -- similar argument goes for xk, which gives us at least two vertices in T that are leaves
     sorry,
+    sorry,
 end
 
 
 /- Theorem 2: if T is a tree on n ≥ 2 vertices and x is a leaf, then the graph obtained by removing x from T is a tree on n - 1 vertices -/
 -- this should probably be made with more general lemmas
 section other
-/-lemma acyclic_subgraph_acyclic (t : acyclic T) (s : set V) : acyclic (induced_subgraph V T s) :=
+lemma acyclic_subgraph_acyclic (t : acyclic T) (s : set V) : acyclic (induced_subgraph V T s) :=
 begin
     -- Proof outline:
     -- T has no cycles so T \ {x} has no cycles
     sorry,
-end -- generalize to any subgraph once that's defined-/
+end -- generalize to any subgraph once that's defined
 
 variable (x : V)
 
@@ -111,7 +113,7 @@ begin
     sorry,
 end-/
 
-/-lemma connected_rmleaf_connected (t : connected T) {x : V} (h : T.leaf x) : connected (induced_subgraph V T (λ v, v ≠ x)) :=
+lemma connected_rmleaf_connected (t : connected T) {x : V} (h : T.leaf x) : connected (induced_subgraph V T (λ v, v ≠ x)) :=
 begin
     -- Proof outline:
     -- there are uv paths for all u v in T
@@ -123,14 +125,14 @@ begin
     unfold connected at t,
     intros h1 h2,
     sorry,
-end-/
+end
 
 end other
 
-/-instance tree_rmleaf_is_tree {x : V} (h : T.leaf x) : tree (induced_subgraph V T (λ v, v ≠ x)) :=
+instance tree_rmleaf_is_tree {x : V} (h : T.leaf x) : tree (induced_subgraph V T (λ v, v ≠ x)) :=
 { connected := T.connected_rmleaf_connected tree.connected h, 
   acyclic := T.acyclic_subgraph_acyclic tree.acyclic _
-}-/
+}
 
 
 /- Theorem 3: TFAE
@@ -205,6 +207,3 @@ end
 
 
 end simple_graph
-
-#lint
--- CR : missing docstrings, unused arguments, and "inhabited"
