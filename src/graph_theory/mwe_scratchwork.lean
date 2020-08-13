@@ -37,6 +37,21 @@ begin
       rw mem_upper_bounds,
       exact h2,
     },
+    have h3 : ∃ (b : ℕ), b ∈ s ∧ ∀ x ∈ s, x ≤ b,
+    {
+      sorry,
+    },
+    cases h3 with m hm,
+    cases hm with hmem hmax,
+    rw set.mem_set_of_eq at hmem,
+    cases hmem with q hq,
+    cases hq with hi hl,
+    use m,
+    use q,
+    split,
+    exact hi,
+    split,
+    exact hl,
     
     sorry,
   },
@@ -56,4 +71,4 @@ end path
 
 end simple_graph
 #lint
--- CR : there are unused arguments, they are there because I will need to use them once I figure out the proofs lol
+-- CR : there are unused arguments, they are there because I will need to use them once I figure out the proofs lol. replace `decidable` with `classical`
