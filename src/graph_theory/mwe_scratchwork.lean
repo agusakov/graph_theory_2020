@@ -11,17 +11,6 @@ namespace path
 variables {G}
 variables (p : G.path)
 
--- This says that there is a tour such that any other tour is no longer, ie the first tour was maximal
-example : ∃ (p : G.path), p.is_tour ∧ ∀ (q : G.path), q.is_tour → q.length ≤ p.length :=
-begin
-  sorry,
-end
-
-instance : has_Sup {n : ℕ | ∃ (p : G.path), p.is_tour ∧ p.length = n} :=
-begin
-  sorry,
-end
-
 section classical
 open_locale classical
 
