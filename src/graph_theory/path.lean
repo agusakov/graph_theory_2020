@@ -284,12 +284,24 @@ def is_Eulerian : Prop := p.is_trail ∧ ∀ e : G.E, p.edge_mem e
 /-- p.is_Hamiltonian if p hits each vertex exactly once. -/
 def is_Hamiltonian : Prop := p.is_tour ∧ ∀ v : V, p.vertex_mem v
 
-/-- p.is_maximum if the length of p is greater than or equal to the length of every other path. -/
-def is_maximum : Prop := p.is_tour ∧ ∀ (q : path G), q.length ≤ p.length
+/-- p.is_maximum_length if the length of p is greater than or equal to the length of every other path. -/
+def is_maximum_length : Prop := p.is_tour ∧ ∀ (q : path G), q.is_tour → q.length ≤ p.length
 
 structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
+
+
+lemma finset_card_le_fintype_card {α : Type*} [fintype α] (s : finset α) : s.card ≤ fintype.card α :=
+finset.card_le_of_subset (finset.subset_univ _)
+
+/- length of path.is_tour is less than the cardinality of V -/
+lemma tour_lt_card [fintype V] [decidable_eq V] (p : path G) (hp : p.is_tour) :
+  p.length < fintype.card V :=
+begin
+  rw [nat.lt_iff_add_one_le, ← vertices_length, ← list.to_finset_card_of_nodup hp],
+  apply finset_card_le_fintype_card,
+end
 
 /-
 -- should have this lemma
