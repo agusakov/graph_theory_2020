@@ -120,7 +120,7 @@ by { cases a, cases b, simp }
 instance has_mem : has_mem V G.E := { mem := λ v e, v ∈ e.val }
 
 /-- Construct an edge from its endpoints. -/
-def edge_of_adj {v w : V} (h : G.adj v w) : G.E := ⟨⟦(v,w)⟧, by simp [h]⟩
+def edge_of_adj {v w : V} (h : G.adj v w) : G.E := ⟨⟦(v,w)⟧, h⟩
 
 lemma edge_eq_edge_of_adj (e : G.E): 
   ∃ v w, ∃ (h : v ◯⦃G⦄ w), e = G.edge_of_adj h := 
@@ -128,11 +128,8 @@ begin
     cases e,
     rcases e_val,
     cases e_val with v w,
-    rcases e_property with ⟨⟨v', w'⟩, h'⟩,
-    use [v', w'],
-    use h'.1,
-    apply subtype.eq,
-    exact h'.2.symm,
+    use [v, w, e_property],
+    refl
 end
 
 lemma edge_eq_edge_of_adj_iff (e : G.E) {v w} (h : G.adj v w) : 
@@ -140,7 +137,7 @@ lemma edge_eq_edge_of_adj_iff (e : G.E) {v w} (h : G.adj v w) :
 begin
   cases e with e he,
   rcases e with ⟨v', w'⟩,
---  change v' ◯⦃G⦄ w' at he,
+  change v' ◯⦃G⦄ w' at he,
   split,
   { intro H,
     cases G with adj symm loopless,
@@ -164,8 +161,7 @@ begin
     replace h := adj_ne _ _ _ h,
     cc,
     clear hv hw,
-    cases he with he h3 h4,
-    set he := adj_ne _ _ _ h3.1,
+    replace he := adj_ne _ _ _ he,
     rcases h_1 with ⟨rfl, rfl⟩,
     rcases h_2 with ⟨rfl, rfl⟩,
     replace h := adj_ne _ _ _ h,
@@ -183,17 +179,10 @@ lemma mem_of_adj_right {v w : V} (h : G.adj v w) :
 lemma adj_iff_exists_edge {v w : V} (hne : v ≠ w) :
 G.adj v w ↔ ∃ (e : G.E), v ∈ e ∧ w ∈ e :=
 begin
-  split, { intro, use ⟦(v,w)⟧, use (v,w), use a, refine ⟨(G.mem_of_adj _), (G.mem_of_adj_right _)⟩,
-  exact a, exact a },
+  split, { intro, use ⟦(v,w)⟧, assumption, refine ⟨(G.mem_of_adj _), (G.mem_of_adj_right _)⟩ },
   rintro ⟨e, ⟨w', hve⟩, ⟨v', hew⟩⟩,
   have : e.val = ⟦(v,w)⟧, { rw [hve, sym2.eq_iff] at hew ⊢, cc },
   have key := e.property, rwa this at key,
-  cases key,
-  cases key_h with vw h,
-  cases quotient.exact h,
-  exact vw,
-  apply G.sym,
-  exact vw,
 end
 
 lemma empty_edge (e : (@empty V).E) : false := by tidy
@@ -237,16 +226,7 @@ lemma E.other_ne (e : G.E) {v : V} (h : v ∈ e) : e.other h ≠ v :=
 begin
   have key := e.property,
   erw [← sym2.mem_other_spec h, sym2.eq_swap] at key,
-  cases key with vw hvw,
-  cases hvw with h1 h2,
-  cases vw with v w,
-  unfold E.other,
-  cases quotient.exact h2 with AA BB,
-  apply G.ne_of_edge,
-  convert h1,
-  symmetry,
-  apply G.ne_of_edge,
-  convert h1
+  exact G.ne_of_edge key,
 end
 
 lemma E.mem_iff (e : G.E) {v : V} (h : v ∈ e) (u : V) :
@@ -292,50 +272,6 @@ begin
   cases k, refl,
 end
 
-theorem E.exists_noncanonical_ordered_pair (e : G.E) :
-(∃ vw : V × V, e.val = quotient.mk vw) :=
-begin
-  rcases E.exists_non_canonical_directed_structure e with ⟨v, w, h⟩,
-  use (v,w),
-  exact h
-end
-
-noncomputable def E.first (e : G.E) : V := (classical.some
-  (E.exists_noncanonical_ordered_pair e)).1
-
-noncomputable def E.second (e : G.E) : V := (classical.some
-  (E.exists_noncanonical_ordered_pair e)).2
-
-theorem mk_first_second (e : G.E) : e.val = ⟦(E.first e, E.second e)⟧ :=
-begin
-  have h := classical.some_spec
-  (E.exists_noncanonical_ordered_pair e),
-  rw h,
-  cases e with e he,
-  congr',
-  ext, 
-  dsimp,
-  refl,refl
-end
-
-theorem first_second_rel (e : G.E) : G.adj (e.first) e.second :=
-begin
-  have := mk_first_second e,
-  cases e with e he,
-  dsimp at this,
-  rw this at he,
-  cases he,
-  cases he_h with h1 h2,
-  cases quotient.exact h2,
-  exact h1,
-  apply G.sym,
-  exact h1
-end
-
-
--- e = ⟦(E.first e, E.second e)⟧ but I don't need this yet
--- because graphs are not directed yet
-
 def E.nonempty (e : G.E) : ∃ v : V, v ∈ e :=
 begin
   rcases E.exists_non_canonical_directed_structure e
@@ -354,29 +290,10 @@ classical.some (E.nonempty e)
 lemma E.some_spec (e : G.E) : e.some ∈ e := 
 classical.some_spec (E.nonempty e)
 
-/-! # counting edges so let V be finite now -/
-
 variables [fintype V]
 
 def E_finset  (G : simple_graph V) : finset $ V × V :=
 finset.filter (λ x, G.adj x.1 x.2) univ
-
-def foo (G : simple_graph V) : fin 2 × G.E ≃ 
-  {x : V × V // x ∈ G.E_finset.val} :=
-{ to_fun := λ be, if be.1 = 0 then ⟨(be.2.some, be.2.other be.2.some_spec), 
-  by
-    { suffices : G.adj be.2.some (be.2.other be.2.some_spec), simpa [E_finset],
-     rw adj_iff_exists_edge, refine ⟨ be.2, be.2.some_spec, _⟩, apply be.2.other_mem, 
-     symmetry, apply be.2.other_ne },
-⟩ 
-     else ⟨(be.2.other be.2.some_spec, be.2.some), by
-     { suffices : G.adj (be.2.other be.2.some_spec) _, simpa [E_finset],
-     rw adj_iff_exists_edge, { refine ⟨ be.2, _, be.2.some_spec⟩, apply be.2.other_mem },
-     simp [be.2.other_ne] },
-     ⟩,
-  inv_fun := sorry,
-  left_inv := sorry,
-  right_inv := sorry }
 
 lemma E_finset_spec [decidable_eq V] [fintype V] [decidable_rel G.adj] : 
 2 * fintype.card G.E = finset.card G.E_finset := 
@@ -385,30 +302,27 @@ begin
   have : fintype.card (fin 2) = 2, { tidy },
   rw [← this, ← fintype.card_prod], 
   rw ← fintype.card_of_finset, swap, { intro, refl },
-  convert fintype.of_equiv_card _,
-  sorry 
-  -- symmetry, refine equiv.of_bijective _ _,
-  -- rintro ⟨b, e⟩, 
-  -- refine if b = 0 
-  --   then ⟨(e.some, e.other e.some_spec), _⟩ 
-  --   else ⟨(e.other e.some_spec, e.some), _⟩,
-  -- { suffices : G.adj e.some (e.other e.some_spec), simpa [E_finset],
-  --   rw adj_iff_exists_edge, refine ⟨ e, e.some_spec, _⟩, apply e.other_mem, 
-  --   symmetry, apply e.other_ne },
-  -- { suffices : G.adj (e.other e.some_spec) _, simpa [E_finset],
-  --   rw adj_iff_exists_edge, { refine ⟨ e, _, e.some_spec⟩, apply e.other_mem },
-  --   simp [e.other_ne] },
-  -- -- proof it's bijective
-  -- split,
-  -- sorry,
-  -- -- refine ⟨_, _⟩, 
-  -- -- intros x y h,
-  -- -- by_cases hxy : x.1 = y.1,
-  -- -- ext, any_goals { simp [hxy] }, 
-  -- -- dsimp at h, by_cases hy : y.1 = 0, 
+  convert fintype.of_equiv_card _, 
+  symmetry, refine equiv.of_bijective _ _,
+  rintro ⟨b, e⟩, 
+  refine if b = 0 
+    then ⟨(e.some, e.other e.some_spec), _⟩ 
+    else ⟨(e.other e.some_spec, e.some), _⟩,
+  { suffices : G.adj e.some (e.other e.some_spec), simpa [E_finset],
+    rw adj_iff_exists_edge, refine ⟨ e, e.some_spec, _⟩, apply e.other_mem, 
+    symmetry, apply e.other_ne },
+  { suffices : G.adj (e.other e.some_spec) _, simpa [E_finset],
+    rw adj_iff_exists_edge, { refine ⟨ e, _, e.some_spec⟩, apply e.other_mem },
+    simp [e.other_ne] },
+  sorry,
+  -- refine ⟨_, _⟩, 
+  -- intros x y h,
+  -- by_cases hxy : x.1 = y.1,
+  -- ext, any_goals { simp [hxy] }, 
+  -- dsimp at h, by_cases hy : y.1 = 0, 
 end
 variables (G)
-
+#check prod.eq_iff_fst_eq_snd_eq
 def card_edges : ℕ := fintype.card G.E
 
 @[simp] lemma empty_card_edges : (@empty V).card_edges = 0 :=
