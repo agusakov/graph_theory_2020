@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Author: Aaron Anderson, Jalex Stark, Kyle Miller.
 -/
 import data.fintype.basic
-import ..sym2
+import .sym2
 import tactic
 
 open finset
@@ -392,3 +392,5 @@ by { intro v, simp }
 end finite
 
 end simple_graph
+#lint
+-- CR : several doc strings missing and there are unused arguments, check back with Michael's repo

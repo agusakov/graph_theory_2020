@@ -5,6 +5,7 @@ Author: Alena Gusakov, Jalex Stark.
 -/
 
 import .basic
+import .path
 
 noncomputable theory
 open_locale classical
@@ -56,6 +57,14 @@ def induced_subgraph (G : simple_graph V) (S : set V) : simple_graph S :=
   loopless := λ x h, G.loopless x h
 }
 
+#check subgraph
+
+-- H is connected
+-- no vertex in C is adjacent to a vertex outside of C
+def is_component (G : simple_graph V) (C : subgraph G) : Prop := 
+connected C.1 --∧ ∀ (v w : V), 
+-- Bhavik said something about intersection of subgraphs containing a point? idk
+
 variables (s : set V) (S : simple_graph s)
 
 -- two ideas: 
@@ -65,10 +74,12 @@ variables (s : set V) (S : simple_graph s)
 /-def induced_subgraph.to_supergraph {S : simple_graph s} {G : simple_graph V} : S.E → G.E
     | -/
 
-def path_inclusion.to_supergraph {V : Type u} : T.path → S.path
+/-def path_inclusion.to_supergraph {V : Type u} : T.path → S.path
     | []     := ∅
-    | (h::t) := {h} ∪ list.to_set t
+    | (h::t) := {h} ∪ list.to_set t-/
 
 
 end simple_graph
 
+#lint
+-- CR : several missing doc strings and there's a missing "inhabited" instance somewhere (make sure you switch to nonempty before taking care of it)
