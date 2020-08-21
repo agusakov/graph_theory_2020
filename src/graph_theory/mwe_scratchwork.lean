@@ -17,9 +17,21 @@ open_locale classical
 section finite
 
 
-lemma connected_deg_ge_one [fintype V] [decidable_eq V] [nonempty V] [connected G] (v : V) : 1 ≤ G.degree v :=
+lemma connected_deg_ge_one [fintype V] [decidable_eq V] [nontrivial V] [connected G] : ∀ v : V, 1 ≤ G.degree v :=
 begin
-  
+  unfold connected at _inst_4,
+  intro v,
+  have h2 : ∃ w, w ≠ v,
+  apply exists_ne,
+  cases h2 with w hvw,
+  specialize _inst_4 v w,
+  cases _inst_4 with p hp,
+  cases hp with ha hb,
+  have h3 : ∃ x, x ∈ p ∧ G.adj v x,
+  sorry,
+  cases h3 with x hx,
+  cases hx with hp hadj,
+  unfold degree,
   sorry,
 end 
 
