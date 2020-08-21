@@ -90,7 +90,11 @@ begin
     exact this,
     split,
     by_contra,
-    have ha : ∃ v : V, T.adj p.head v,
+    have ha : ∃ v : V, T.adj p.head v ∧ v ∉ p.vertices,
+    -- so with assumption a, we have that the cardinality of the edgeset of p.head is greater than 1
+    -- shit not exactly, v.leaf means its cardinality is exactly one
+    -- so we also need T.connected
+    -- i think we need a lemma for T.connected that says all vertices have degree ≥ 1
     --push_neg at a,
     
     -- assume for contradiction that we have some neighbor y of x0, where y ≠ x1. this gives us two cases:
@@ -100,6 +104,7 @@ begin
             -- (these two things should probably be their own lemmas so we can just apply them to x0 and xk)
     -- so then x0 does not have any neighbors besides x1, and therefore has degree 1
     -- similar argument goes for xk, which gives us at least two vertices in T that are leaves
+    sorry,
     sorry,
     sorry,
 end
@@ -225,9 +230,11 @@ end
 -- i guess make a bunch of iff lemmas out of that so i can rw stuff
 
 -- make Prüfer codes
-
+end path
 
 end simple_graph
+
+end classical
 
 #lint
 -- CR : missing docstrings, unused arguments, and "inhabited"

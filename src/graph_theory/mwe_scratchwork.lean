@@ -14,6 +14,17 @@ variables (p : G.path)
 section classical
 open_locale classical
 
+section finite
+
+
+lemma connected_deg_ge_one [fintype V] [decidable_eq V] [nonempty V] [connected G] (v : V) : 1 ≤ G.degree v :=
+begin
+  
+  sorry,
+end 
+
+end finite
+
 #check nat.find
 /- there exists a path, path.is_tour, s.t. path.is_maximum_length -/
 -- CR : can be generalized to infinite graphs (i think??)
