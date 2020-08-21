@@ -5,7 +5,7 @@ import .subgraph
 -- from math 688 notes, lec-19
 
 universe u
-variables (V : Type u)
+variables {V : Type u}
 
 -- TO DO:
     -- define components (they are used twice here), give them some lemmas
@@ -15,6 +15,7 @@ variables (V : Type u)
 -- might be useful:
     -- `finset.eq_singleton_iff_unique_mem` says `s = {a} ↔ a ∈ s ∧ ∀ x ∈ s, x = a`
 
+section classical
 open_locale classical
 
 namespace simple_graph
@@ -25,7 +26,13 @@ variables {V} (T : simple_graph V) (a b : V) --(S : simple_graph (λ v, v ≠ a)
 
 #check T.adj a b
 
-def acyclic : Prop := ∀ (p : T.path), ¬ p.simple_cycle
+def acyclic : Prop := ∀ (p : T.path), ¬ p.is_cycle
+-- CR : changing the definition from 
+    -- ∀ (p : T.path), ¬ p.simple_cycle
+-- to
+    -- ∀ (p : T.path), ¬ p.is_cycle
+-- the simple_cycle definition is annoying because it has the extra condition that p is a tour
+-- we don't need that condition here (i don't think)
 
 class tree : Prop := 
 (connected : connected T)
@@ -36,12 +43,14 @@ class tree : Prop :=
 
 def leaf (v : V) [fintype (T.neighbor_set v)] : Prop := T.degree v = 1
 
-variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
-
 #check fintype.card
 
+namespace path
+
+variables [∀ v, fintype (T.neighbor_set v)] [tree T] (p : path T)
+
 -- move this to simple_graph later (need to prove that `p.is_tour` and therefore `p.is_maximal` exists in any finite simple graph)
-lemma fin_max_path [fintype V] (h : 2 ≤ fintype.card V) : ∃ (p : path T), p.is_maximum :=
+lemma fin_max_tour [fintype V] [decidable_eq V] [nonempty V]: ∃ (p : path T), p.is_maximum_length :=
 begin
     
     -- show that if the number of vertices is finite then the path lengths are all finite
@@ -56,11 +65,9 @@ begin
 end
 
 /- Theorem 1: every tree on n ≥ 2 vertices contains at least two vertices of degree 1 -/
-lemma two_deg_one [fintype V] (h : 2 ≤ fintype.card V) : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
+lemma two_deg_one [fintype V] [decidable_eq V] [nonempty V] : ∃ (v₁ v₂ : V), v₁ ≠ v₂ ∧ T.leaf v₁ ∧ T.leaf v₂ :=
 begin
-    /- 
-    have h3 := path.fin_max_tour,
-    have h2 := fintype.exists_pair_of_one_lt_card h,
+    /-have h2 := fintype.exists_pair_of_one_lt_card h,
     cases h2 with a hb,
     cases hb with b h3,
     use a,
@@ -69,8 +76,23 @@ begin
     exact h3, -/
     -- Proof outline:
     -- let p = x0 x1 ... xk in T be a maximal path in tree T
+    have h3 := fin_max_tour T,
         -- Sub-lemma : prove that maximal paths exist
         -- use `p.tail.length` (number of edges in `p`)
+    cases h3 with p hp,
+    cases hp with ht hl,
+    use p.head,
+    use p.last,
+    split,
+    change ¬ p.is_cycle,
+    have : T.acyclic := tree.acyclic,
+    specialize this p,
+    exact this,
+    split,
+    by_contra,
+    have ha : ∃ v : V, T.adj p.head v,
+    --push_neg at a,
+    
     -- assume for contradiction that we have some neighbor y of x0, where y ≠ x1. this gives us two cases:
         -- either y is contained in a path that links back up with the original path, so acyclicity is violated
         -- or y is contained in a path that does not link back up, which then makes that new path an extension of the original, so maximality of p is violated
@@ -78,6 +100,7 @@ begin
             -- (these two things should probably be their own lemmas so we can just apply them to x0 and xk)
     -- so then x0 does not have any neighbors besides x1, and therefore has degree 1
     -- similar argument goes for xk, which gives us at least two vertices in T that are leaves
+    sorry,
     sorry,
 end
 

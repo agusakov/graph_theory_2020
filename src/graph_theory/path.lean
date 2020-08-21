@@ -291,7 +291,7 @@ structure simple_cycle : Prop :=
 (is_cycle : p.is_cycle)
 (is_tour : p.is_tour)
 
-
+-- CR : this should be in mathlib
 lemma finset_card_le_fintype_card {α : Type*} [fintype α] (s : finset α) : s.card ≤ fintype.card α :=
 finset.card_le_of_subset (finset.subset_univ _)
 
@@ -302,6 +302,7 @@ begin
   rw [nat.lt_iff_add_one_le, ← vertices_length, ← list.to_finset_card_of_nodup hp],
   apply finset_card_le_fintype_card,
 end
+-- vertex length not great to work with (similar to zero polynomial)
 
 /-
 -- should have this lemma
